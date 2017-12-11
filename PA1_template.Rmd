@@ -90,8 +90,12 @@ activity_data$weekday_indicator <- factor(ifelse(weekdays(activity_data$dateTime
 StepsPerDay_weekday_indicator <- data.frame(tapply(X = activity_data$steps, INDEX = list(activity_data$interval, activity_data$weekday_indicator), FUN = mean))
 
 #Create the two plots
-par(mfrow = c(2,1))
-plot(levels(intervals_factor), StepsPerDay_weekday_indicator$weekday, type = "l", main = "Weekdays", xlab = "Intervals", ylab = "Average Steps")
-plot(levels(intervals_factor), StepsPerDay_weekday_indicator$weekend, type = "l", main = "Weekend", xlab = "Intervals", ylab = "Average Steps")
+StepsPerDay_weekday_indicator$intervals <- row.names(StepsPerDay_weekday_indicator)
+library(reshape2)
+library(ggplot2)
+dfmelt <- melt(StepsPerDay_weekday_indicator, id.vars = 3, value.name = "steps")
+ggplot(dfmelt, aes(x=as.numeric(intervals), y = steps,  colour = variable)) + geom_line() + facet_grid(variable ~ .) + xlab("Intervals")
 
 ```
+
+There are some slight differences in activity patterns, since on weekdays we can see that the subject is a bit more active in the early morning hours, than at the same hours during weekends.
