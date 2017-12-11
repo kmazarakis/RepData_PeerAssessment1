@@ -1,5 +1,6 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "Kleanthis Mazarakis"
 output: 
   html_document:
     keep_md: true
@@ -7,16 +8,39 @@ output:
 
 
 ## Loading and preprocessing the data
-
-
+```{r}
+activity_data <- read.csv("activity.csv")
+head(activity_data)
+str(activity_data)
+activity_data$dateTime <- as.Date(activity_data$date, format = "%Y-%m-%d")
+```
 
 ## What is mean total number of steps taken per day?
+```{r}
+StepsPerDay <- tapply(activity_data$steps, activity_data$dateTime, FUN = "sum")
+hist(StepsPerDay)
 
-
+mean_per_day <- mean(StepsPerDay, na.rm = T)
+mean_per_day
+median_per_day <- median(StepsPerDay, na.rm = T)
+median_per_day
+```
+The mean steps per day was 10766 and the median was 10765
 
 ## What is the average daily activity pattern?
+```{r}
+interval_average <- tapply(activity_data$steps, activity_data$interval, mean, na.rm = T)
+intervals_factor <- factor(activity_data$interval)
+plot(levels(intervals_factor), interval_average, type = "l", xlab = "Intervals", ylab = "Average Steps", main = "Average Daily Activity Pattern")
+```
 
-
+Now let's check which 5 min interval, on average, contains the maximum number of steps
+```{r}
+# Creating a data frame with the intervals and the average steps per interval and then will select the maximum row
+df <- data.frame(levels(intervals_factor), interval_average)
+df[df$interval_average == max(df$interval_average),]
+```
+So the maximum number of steps per interval is 206 and it occured on interval 835.
 
 ## Imputing missing values
 
