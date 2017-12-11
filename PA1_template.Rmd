@@ -44,6 +44,54 @@ So the maximum number of steps per interval is 206 and it occured on interval 83
 
 ## Imputing missing values
 
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
+```{r}
+Total_na_rows <- nrow(activity_data)-sum(complete.cases(activity_data))
+paste("The Total number of rows containing missing values is", Total_na_rows)
+
+summary(is.na(activity_data))
+```
+
+It looks like all the missing values are only on the steps column
+in order to fill in the missing values, we are going to use the mean of the specific 5 minute interval
+
+```{r}
+for (i in 1:nrow(activity_data)) {
+    if (is.na(activity_data$steps[i])) {activity_data$steps[i] <- interval_average[names(interval_average) == activity_data$interval[i]]}
+}
+
+nrow(activity_data)-sum(complete.cases(activity_data))
+head(activity_data)
+```
+
+We can see that the missing values have been replaced successfully
+
+
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+```{r}
+StepsPerDay_no_na <- tapply(activity_data$steps, activity_data$dateTime, FUN = "sum")
+hist(StepsPerDay_no_na, main = "Histogram of Steps per Day with missing values imputed by the average of the interval", xlab = "Steps per Day")
+
+mean(StepsPerDay_no_na)
+median(StepsPerDay_no_na)
+
+```
+
+From our results, we can see that imputing the missing values didn;t change our results dramatically. It seems that only the median changed slightly, from 10765 to 10766.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+activity_data$weekday_indicator <- factor(ifelse(weekdays(activity_data$dateTime) %in% c("Saturday", "Sunday"), "weekend", "weekday"))
+
+#Calculate average steps per interval for weekdays and weekends
+StepsPerDay_weekday_indicator <- data.frame(tapply(X = activity_data$steps, INDEX = list(activity_data$interval, activity_data$weekday_indicator), FUN = mean))
+
+#Create the two plots
+par(mfrow = c(2,1))
+plot(levels(intervals_factor), StepsPerDay_weekday_indicator$weekday, type = "l", main = "Weekdays", xlab = "Intervals", ylab = "Average Steps")
+plot(levels(intervals_factor), StepsPerDay_weekday_indicator$weekend, type = "l", main = "Weekend", xlab = "Intervals", ylab = "Average Steps")
+
+```
